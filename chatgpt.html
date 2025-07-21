@@ -683,7 +683,7 @@
 
         async function sendMessageToAPI(message, fileContent, fileType) {
             const apiKey = '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';
-            const url = 'https://api.openai.com/v1/chat/completions';
+            const url = 'https://openrouter.ai/api/v1';
             const behavior = aiBehavior.value || 'Você é um assistente de IA útil e amigável.';
 
             const recentHistory = currentChatId !== null ? 
