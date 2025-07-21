@@ -1,0 +1,80 @@
+<!-- features.html -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuxiva IA - Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="css/custom.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body class="bg-black text-white">
+     <header class="fixed top-0 left-0 w-full bg-black z-50">
+        <nav class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="/" class="text-2xl font-bold">Nuxiva IA</a>
+            <div class="hidden md:flex space-x-4">
+                <a href="/" class="hover:text-green-500">Home</a>
+                <a href="/about.html" class="hover:text-green-500">Sobre</a>
+                <a href="/features.html" class="hover:text-green-500">Funcionalidades</a>
+                <a href="/api.html" class="hover:text-green-500">API</a>
+                <a href="/news.html" class="hover:text-green-500">Blog</a>
+                <a href="/chatgpt.html" class="hover:text-green-500">Chat</a>
+            </div>
+            <button class="md:hidden" id="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </nav>
+        <div class="md:hidden hidden" id="mobile-menu">
+            <a href="/" class="block px-4 py-2 hover:bg-gray-800">Home</a>
+            <a href="/about.html" class="block px-4 py-2 hover:bg-gray-800">Sobre</a>
+            <a href="/features.html" class="block px-4 py-2 hover:bg-gray-800">Funcionalidades</a>
+            <a href="/api.html" class="block px-4 py-2 hover:bg-gray-800">API</a>
+            <a href="/news.html" class="block px-4 py-2 hover:bg-gray-800">Blog</a>
+            <a href="/chatgpt.html" class="block px-4 py-2 hover:bg-gray-800">Chat</a>
+        </div>
+    </header>
+
+    <!-- Funcionalidades -->
+    <section class="py-16">
+        <div class="container mx-auto px-4">
+            <h1 class="text-4xl font-bold mb-8 text-center">Funcionalidades</h1>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="feature" id="text-generator">
+                    <i class="fas fa-robot text-4xl mb-4 text-green-500"></i>
+                    <h2 class="text-2xl font-semibold mb-2">Text Generator</h2>
+                    <p>Gere textos criativos, artigos e e-mails com nossa IA avançada.</p>
+                    <p class="mt-4">Exemplo: Crie um e-mail de boas-vindas para novos clientes.</p>
+                </div>
+                <div class="feature" id="image-analyzer">
+                    <i class="fas fa-image text-4xl mb-4 text-green-500"></i>
+                    <h2 class="text-2xl font-semibold mb-2">Image Analyzer</h2>
+                    <p>Classifique e descreva imagens automaticamente.</p>
+                    <p class="mt-4">Exemplo: Identifique objetos em uma foto de paisagem.</p>
+                </div>
+                <!-- Outras funcionalidades -->
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-black text-white py-8">
+        <div class="container mx-auto text-center">
+            <div class="flex justify-center space-x-4 mb-4">
+                <a href="/about.html" class="hover:text-green-500">Sobre</a>
+                <a href="/features.html" class="hover:text-green-500">Funcionalidades</a>
+                <a href="/api.html" class="hover:text-green-500">API</a>
+                <a href="/news.html" class="hover:text-green-500">Blog</a>
+                <a href="/support.html" class="hover:text-green-500">Suporte</a>
+            </div>
+            <div class="flex justify-center space-x-4 mb-4">
+                <a href="#" class="text-green-500"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="text-green-500"><i class="fab fa-facebook"></i></a>
+                <a href="#" class="text-green-500"><i class="fab fa-linkedin"></i></a>
+            </div>
+            <p>&copy; 2025 Nuxiva IA. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!-- about.html -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuxiva IA - About</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="css/custom.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body class="bg-black text-white">
+    <!-- Header -->
+
+    <header class="fixed top-0 left-0 w-full bg-black z-50">
+        <nav class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="/" class="text-2xl font-bold">Nuxiva IA</a>
+            <div class="hidden md:flex space-x-4">
+                <a href="/" class="hover:text-green-500">Home</a>
+                <a href="/about.html" class="hover:text-green-500">Sobre</a>
+                <a href="/features.html" class="hover:text-green-500">Funcionalidades</a>
+                <a href="/api.html" class="hover:text-green-500">API</a>
+                <a href="/news.html" class="hover:text-green-500">Blog</a>
+                <a href="/chatgpt.html" class="hover:text-green-500">Chat</a>
+            </div>
+            <button class="md:hidden" id="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </nav>
+        <div class="md:hidden hidden" id="mobile-menu">
+            <a href="/" class="block px-4 py-2 hover:bg-gray-800">Home</a>
+            <a href="/about.html" class="block px-4 py-2 hover:bg-gray-800">Sobre</a>
+            <a href="/features.html" class="block px-4 py-2 hover:bg-gray-800">Funcionalidades</a>
+            <a href="/api.html" class="block px-4 py-2 hover:bg-gray-800">API</a>
+            <a href="/news.html" class="block px-4 py-2 hover:bg-gray-800">Blog</a>
+            <a href="/chatgpt.html" class="block px-4 py-2 hover:bg-gray-800">Chat</a>
+        </div>
+    </header>
+
+    <!-- Sobre a IA -->
+    <section class="py-16">
+        <div class="container mx-auto px-4">
+            <h1 class="text-4xl font-bold mb-8 text-center">Sobre a Nuxiva IA</h1>
+            <p class="text-lg mb-8 text-center">A Nuxiva IA é uma empresa dedicada a fornecer soluções de inteligência artificial de ponta para empresas e projetos. Nossa missão é democratizar o acesso à IA, tornando-a acessível e útil para todos. Com expertise em Machine Learning e Deep Learning, estamos comprometidos em impulsionar a inovação e o crescimento de nossos clientes.</p>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-date">2023</div>
+                    <div class="timeline-content">Lançamento do modelo de texto</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">2024</div>
+                    <div class="timeline-content">Integração de visão computacional</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">2025</div>
+                    <div class="timeline-content">API pública disponível</div>
+                </div>
+            </div>
+            <div class="text-center mt-8">
+                <img src="img/team.jpg" alt="Equipe Nuxiva IA" class="rounded-lg shadow-lg">
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+<footer class="bg-black text-white py-8">
+        <div class="container mx-auto text-center">
+            <div class="flex justify-center space-x-4 mb-4">
+                <a href="/about.html" class="hover:text-green-500">Sobre</a>
+                <a href="/features.html" class="hover:text-green-500">Funcionalidades</a>
+                <a href="/api.html" class="hover:text-green-500">API</a>
+                <a href="/news.html" class="hover:text-green-500">Blog</a>
+                <a href="/support.html" class="hover:text-green-500">Suporte</a>
+            </div>
+            <div class="flex justify-center space-x-4 mb-4">
+                <a href="#" class="text-green-500"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="text-green-500"><i class="fab fa-facebook"></i></a>
+                <a href="#" class="text-green-500"><i class="fab fa-linkedin"></i></a>
+            </div>
+            <p>&copy; 2025 Nuxiva IA. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+    
+    <script src="js/main.js"></script>
+</body>
+</html>

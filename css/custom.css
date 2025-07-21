@@ -1,0 +1,21 @@
+/* custom.css */
+.timeline {
+    position: relative;
+    padding: 20px 0;
+}
+
+.timeline-item {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.timeline-date {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.timeline-content {
+    background: #2a2a2a;
+    padding: 10px;
+    border-radius: 5px;
+}

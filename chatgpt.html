@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuxiva IA - Chat</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            background-color: #0d0d0d;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            overflow: hidden;
+        }
+        .chat-container {
+            display: flex;
+            height: calc(100vh - 64px);
+            margin-top: 64px;
+        }
+        .sidebar {
+            width: 0;
+            background-color: #1a1a1a;
+            padding: 0;
+            transition: width 0.3s ease, box-shadow 0.3s ease;
+            overflow-y: auto;
+            position: fixed;
+            top: 64px;
+            bottom: 0;
+            left: 0;
+            z-index: 40;
+        }
+        .sidebar.open {
+            width: 250px;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
+        }
+        .chat-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #0d0d0d;
+            position: relative;
+        }
+        #particles-js {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+        .chat-messages {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #1DB954 #333;
+            position: relative;
+            z-index: 1;
+        }
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            margin: 10px;
+            border-radius: 12px;
+            line-height: 1.5;
+        }
+        .user-message {
+            background-color: #1DB954;
+            margin-left: auto;
+            color: #000;
+        }
+        .ai-message {
+            background-color: #333;
+            margin-right: auto;
+        }
+        .message h2 {
+            font-size: 1.5rem;
+            color: #1DB954;
+            margin: 0.5rem 0;
+            transition: color 0.3s ease;
+        }
+        .message h3 {
+            font-size: 1.25rem;
+            color: #1DB954;
+            margin: 0.5rem 0;
+            transition: color 0.3s ease;
+        }
+        .message em {
+            font-style: italic;
+            color: #ffffff;
+            transition: color 0.3s ease;
+        }
+        .message del {
+            color: #1DB954;
+            transition: color 0.3s ease;
+        }
+        .message strong:hover, .message h2:hover, .message h3:hover, .message em:hover, .message del:hover {
+            color: #17a34a;
+        }
+        .typing-indicator {
+            display: none;
+            margin: 10px;
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid #333;
+            border-top: 3px solid #1DB954;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .copy-button, .preview-button, .export-button, .export-chat-button {
+            background-color: #1DB954;
+            color: #000;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .copy-button, .preview-button, .export-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .preview-button {
+            right: 80px;
+        }
+        .export-button {
+            right: 150px;
+        }
+        pre:hover .copy-button, pre:hover .preview-button, pre:hover .export-button {
+            opacity: 1;
+        }
+        pre {
+            background: #2d2d2d;
+            padding: 15px;
+            border-radius: 8px;
+            position: relative;
+            margin: 10px 0;
+        }
+        .input-area {
+            padding: 20px;
+            background-color: #1a1a1a;
+            border-top: 1px solid #333;
+            position: relative;
+            z-index: 1;
+        }
+        #user-input {
+            flex-grow: 1;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 8px 0 0 8px;
+            background-color: #2d2d2d;
+            color: #ffffff;
+            font-size: 1rem;
+            transition: box-shadow 0.3s ease, height 0.3s ease;
+            resize: vertical;
+            min-height: 48px;
+            max-height: 200px;
+        }
+        #user-input:focus {
+            outline: none;
+            box-shadow: 0 0 10px rgba(29, 185, 84, 0.5);
+        }
+        #user-input::placeholder {
+            color: #888;
+            animation: fade 2s infinite;
+        }
+        @keyframes fade {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+        #send-button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 0 8px 8px 0;
+            background: linear-gradient(90deg, #1DB954 0%, #17a34a 100%);
+            color: #000;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+        }
+        #send-button:hover {
+            animation: pulse 1.5s infinite;
+            box-shadow: 0 0 10px rgba(29, 185, 84, 0.7);
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        #send-button:active {
+            transform: scale(0.95);
+        }
+        .sidebar-toggle {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: #1DB954;
+            color: #000;
+            padding: 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 45;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .chat-area:hover .sidebar-toggle {
+            opacity: 1;
+        }
+        .sidebar-close {
+            background-color: #1DB954;
+            color: #000;
+            padding: 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            width: 100%;
+            text-align: center;
+            display: none;
+        }
+        .sidebar.open .sidebar-close {
+            display: block;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .modal.open {
+            display: flex;
+            opacity: 1;
+        }
+        .modal-content {
+            background-color: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 800px;
+            max-height: 80%;
+            overflow: auto;
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+        .modal.open .modal-content {
+            transform: scale(1);
+        }
+        .modal iframe {
+            width: 100%;
+            height: 400px;
+            border: none;
+            background: white;
+        }
+        .new-chat-button, .search-button, .export-chat-button {
+            background-color: #1DB954;
+            color: #000;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            width: 100%;
+            text-align: center;
+        }
+        .new-chat-button:hover, .search-button:hover, .export-chat-button:hover, .sidebar-close:hover {
+            background-color: #17a34a;
+        }
+        .search-input {
+            width: 100%;
+            padding: 8px;
+            background-color: #2d2d2d;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .history-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .history-item button {
+            background: none;
+            border: none;
+            color: #ffffff;
+            cursor: pointer;
+            padding: 5px;
+        }
+        .history-item button:hover {
+            color: #1DB954;
+        }
+        .rename-input {
+            display: none;
+            width: 100%;
+            padding: 5px;
+            background-color: #2d2d2d;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+        }
+        header {
+            background-color: #0d0d0d;
+            z-index: 50;
+        }
+        header a:hover {
+            color: #1DB954;
+        }
+        #mobile-menu {
+            background-color: #1a1a1a;
+        }
+        #mobile-menu a:hover {
+            background-color: #2d2d2d;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="fixed top-0 left-0 w-full bg-black z-50">
+        <nav class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="/" class="text-2xl font-bold">Nuxiva IA</a>
+            <div class="hidden md:flex space-x-4">
+                <a href="/home.html" class="hover:text-green-500">Home</a>
+                <a href="/about.html" class="hover:text-green-500">Sobre</a>
+                <a href="/features.html" class="hover:text-green-500">Funcionalidades</a>
+                <a href="/api.html" class="hover:text-green-500">API</a>
+                <a href="/news.html" class="hover:text-green-500">Blog</a>
+                <a href="/login.html" class="hover:text-green-500">Login(andamento)</a>
+            </div>
+            <button class="md:hidden" id="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </nav>
+        <div class="md:hidden hidden" id="mobile-menu">
+            <a href="/" class="block px-4 py-2 hover:bg-gray-800">Home</a>
+            <a href="/about.html" class="block px-4 py-2 hover:bg-gray-800">Sobre</a>
+            <a href="/features.html" class="block px-4 py-2 hover:bg-gray-800">Funcionalidades</a>
+            <a href="/api.html" class="block px-4 py-2 hover:bg-gray-800">API</a>
+            <a href="/news.html" class="block px-4 py-2 hover:bg-gray-800">Blog</a>
+            <a href="/login.html" class="block px-4 py-2 hover:bg-gray-800">Login</a>
+        </div>
+    </header>
+
+    <div class="chat-container">
+        <div class="sidebar" id="sidebar">
+            <button class="sidebar-close" id="sidebar-close">✖</button>
+            <button id="new-chat-button" class="new-chat-button">Novo Chat</button>
+            <button id="export-chat-button" class="export-chat-button" style="display: none;">Exportar Conversa</button>
+            <h3 class="text-lg font-bold mb-4 mt-4">Histórico</h3>
+            <input type="text" id="search-input" class="search-input" placeholder="Pesquisar no histórico...">
+            <ul id="chat-history" class="text-gray-300"></ul>
+            <h3 class="text-lg font-bold mt-6 mb-4">Comportamento da IA</h3>
+            <textarea id="ai-behavior" class="w-full p-2 bg-gray-700 text-white rounded" placeholder="Ex.: Responda como um professor de IA..."></textarea>
+            <h3 class="text-lg font-bold mt-6 mb-4">Upload de Arquivo</h3>
+            <input type="file" id="file-upload" accept=".txt,.png,.jpg,.pdf" class="text-gray-300">
+        </div>
+        <div class="chat-area">
+            <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+            <div id="particles-js"></div>
+            <div class="chat-messages" id="chat-messages"></div>
+            <div id="typing-indicator" class="typing-indicator">
+                <div class="spinner"></div>
+            </div>
+            <div class="input-area">
+                <div class="flex">
+                    <input type="text" id="user-input" class="flex-grow p-3 rounded-l-lg bg-gray-700 text-white" placeholder="Digite sua mensagem...">
+                    <button id="send-button" class="bg-green-500 text-white px-6 py-3 rounded-r-lg hover:bg-green-600 transition duration-300">Enviar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="preview-modal">
+        <div class="modal-content">
+            <button onclick="document.getElementById('preview-modal').style.display='none'" class="bg-red-500 text-white px-4 py-2 rounded mb-4">Fechar</button>
+            <iframe id="preview-iframe"></iframe>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script>
+        // Initialize particles.js
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 50, density: { enable: true, value_area: 800 } },
+                color: { value: '#1DB954' },
+                shape: { type: 'circle' },
+                opacity: { value: 0.5, random: true },
+                size: { value: 3, random: true },
+                line_linked: { enable: false },
+                move: { enable: true, speed: 1, direction: 'none', random: true, out_mode: 'out' }
+            },
+            interactivity: { detect_on: 'canvas', events: { onhover: { enable: false }, onclick: { enable: false } } },
+            retina_detect: true
+        });
+
+        const chatMessages = document.getElementById('chat-messages');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        const typingIndicator = document.getElementById('typing-indicator');
+        const chatHistory = document.getElementById('chat-history');
+        const aiBehavior = document.getElementById('ai-behavior');
+        const fileUpload = document.getElementById('file-upload');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        const sidebarClose = document.getElementById('sidebar-close');
+        const menuToggle = document.getElementById('menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const newChatButton = document.getElementById('new-chat-button');
+        const exportChatButton = document.getElementById('export-chat-button');
+        const searchInput = document.getElementById('search-input');
+        const previewModal = document.getElementById('preview-modal');
+        const previewIframe = document.getElementById('preview-iframe');
+
+        let chats = JSON.parse(localStorage.getItem('nuxivaChats')) || [];
+        let currentChatId = null;
+
+        sidebarToggle.addEventListener('click', () => {
+            console.log('Opening sidebar');
+            sidebar.classList.toggle('open');
+            mobileMenu.classList.add('hidden');
+        });
+
+        sidebarClose.addEventListener('click', () => {
+            console.log('Closing sidebar');
+            sidebar.classList.remove('open');
+        });
+
+        menuToggle.addEventListener('click', () => {
+            console.log('Toggling mobile menu');
+            mobileMenu.classList.toggle('hidden');
+            sidebar.classList.remove('open');
+        });
+
+        newChatButton.addEventListener('click', () => {
+            currentChatId = chats.length;
+            chats.push({ timestamp: Date.now(), messages: [], name: `Conversa ${chats.length + 1}` });
+            localStorage.setItem('nuxivaChats', JSON.stringify(chats));
+            chatMessages.innerHTML = '';
+            searchInput.value = '';
+            exportChatButton.style.display = 'none';
+            loadChatHistory();
+            sidebar.classList.remove('open');
+        });
+
+        exportChatButton.addEventListener('click', () => {
+            if (currentChatId !== null) {
+                exportChat(currentChatId);
+            }
+        });
+
+        searchInput.addEventListener('input', () => {
+            const query = searchInput.value.toLowerCase();
+            loadChatHistory(query);
+        });
+
+        function loadChatHistory(query = '') {
+            chatHistory.innerHTML = '';
+            chats.forEach((chat, index) => {
+                const messagesText = chat.messages.map(msg => msg.content).join(' ').toLowerCase();
+                const chatName = chat.name ? chat.name.toLowerCase() : `conversa ${index + 1}`;
+                if (!query || messagesText.includes(query) || chatName.includes(query)) {
+                    const li = document.createElement('li');
+                    li.classList.add('history-item');
+                    li.innerHTML = `
+                        <span class="cursor-pointer hover:text-green-400">${chat.name || `Conversa ${index + 1}`} (${new Date(chat.timestamp).toLocaleTimeString()})</span>
+                        <div>
+                            <button class="rename-button">✏️</button>
+                            <button class="delete-button">🗑️</button>
+                        </div>
+                        <input type="text" class="rename-input" id="rename-input-${index}" placeholder="Novo nome">
+                    `;
+                    chatHistory.appendChild(li);
+
+                    const renameButton = li.querySelector('.rename-button');
+                    const deleteButton = li.querySelector('.delete-button');
+                    const renameInput = li.querySelector(`#rename-input-${index}`);
+
+                    renameButton.addEventListener('click', () => renameChat(index, renameInput));
+                    deleteButton.addEventListener('click', () => {
+                        console.log(`Tentando excluir conversa ${index}`);
+                        deleteChat(index);
+                    });
+                    li.querySelector('span').addEventListener('click', () => loadChat(index));
+                }
+            });
+        }
+
+        function loadChat(index) {
+            currentChatId = index;
+            chatMessages.innerHTML = chats[index].messages.map(msg => 
+                `<div class="message ${msg.role === 'user' ? 'user-message' : 'ai-message'}">${formatMessage(msg.content)}</div>`
+            ).join('');
+            Prism.highlightAll();
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            exportChatButton.style.display = 'block';
+        }
+
+        function deleteChat(index) {
+            if (confirm('Tem certeza que deseja excluir esta conversa?')) {
+                console.log(`Excluindo conversa ${index}`);
+                chats.splice(index, 1);
+                localStorage.setItem('nuxivaChats', JSON.stringify(chats));
+                if (currentChatId === index) {
+                    currentChatId = null;
+                    chatMessages.innerHTML = '';
+                    exportChatButton.style.display = 'none';
+                } else if (currentChatId > index) {
+                    currentChatId--;
+                }
+                loadChatHistory(searchInput.value);
+                console.log('Histórico atualizado:', chats);
+            }
+        }
+
+        function renameChat(index, input) {
+            input.style.display = 'block';
+            input.focus();
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && input.value.trim()) {
+                    chats[index].name = input.value.trim();
+                    localStorage.setItem('nuxivaChats', JSON.stringify(chats));
+                    loadChatHistory(searchInput.value);
+                    input.style.display = 'none';
+                }
+            }, { once: true });
+        }
+
+        function exportChat(index) {
+            const chat = chats[index];
+            const data = {
+                name: chat.name || `Conversa ${index + 1}`,
+                timestamp: chat.timestamp,
+                messages: chat.messages
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `conversa_${index + 1}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function saveChat(message, response) {
+            if (!currentChatId && currentChatId !== 0) {
+                currentChatId = chats.length;
+                chats.push({ timestamp: Date.now(), messages: [], name: `Conversa ${chats.length + 1}` });
+            }
+            chats[currentChatId].messages.push({ role: 'user', content: message }, { role: 'ai', content: response });
+            localStorage.setItem('nuxivaChats', JSON.stringify(chats));
+            loadChatHistory(searchInput.value);
+            exportChatButton.style.display = 'block';
+        }
+
+        function formatMessage(content) {
+            // Preserve code blocks
+            const codeRegex = /```(\w+)?\n([\s\S]*?)```/g;
+            const codeMatches = [];
+            let codeIndex = 0;
+            content = content.replace(codeRegex, (match, lang, code) => {
+                codeMatches.push({ lang: lang || 'text', code });
+                return `{{CODE_BLOCK_${codeIndex++}}}`;
+            });
+
+            // Process Markdown
+            content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'); // Bold
+            content = content.replace(/\*(.*?)\*/g, '<em>$1</em>'); // Italic
+            content = content.replace(/~~(.*?)~~/g, '<del>$1</del>'); // Strikethrough
+            content = content.replace(/^# (.*?)$/gm, '<h2>$1</h2>'); // Heading 1
+            content = content.replace(/^### (.*?)$/gm, '<h3>$1</h3>'); // Heading 3
+
+            // Restore code blocks
+            content = content.replace(/{{CODE_BLOCK_(\d+)}}/g, (_, index) => {
+                const { lang, code } = codeMatches[index];
+                let previewButton = '';
+                let exportButton = '';
+                if (lang === 'html') {
+                    previewButton = `<button class="preview-button" onclick="previewHTML(\`${encodeURIComponent(code)}\`)">Visualizar</button>`;
+                    exportButton = `<button class="export-button" onclick="exportHTML(\`${encodeURIComponent(code)}\`, 'output.html')">Exportar</button>`;
+                }
+                return `<pre><code class="language-${lang}">${code}</code><button class="copy-button" onclick="navigator.clipboard.writeText(\`${code}\`)">Copiar</button>${previewButton}${exportButton}</pre>`;
+            });
+
+            return content;
+        }
+
+        function previewHTML(encodedCode) {
+            const code = decodeURIComponent(encodedCode);
+            previewIframe.srcdoc = code;
+            previewModal.classList.add('open');
+            previewModal.style.display = 'flex';
+        }
+
+        function exportHTML(encodedCode, filename) {
+            const code = decodeURIComponent(encodedCode);
+            const blob = new Blob([code], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        sendButton.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message && fileUpload.files.length === 0) return;
+
+            let finalMessage = message;
+            let fileContent = '';
+            if (fileUpload.files.length > 0) {
+                const file = fileUpload.files[0];
+                if (file.type.startsWith('image/')) {
+                    fileContent = await readFileAsBase64(file);
+                    finalMessage += `\n[Imagem carregada: ${file.name}]`;
+                } else if (file.type === 'application/pdf') {
+                    fileContent = await readFileAsBase64(file);
+                    finalMessage += `\n[PDF carregado: ${file.name}]`;
+                } else if (file.type === 'text/plain') {
+                    fileContent = await file.text();
+                    finalMessage += `\n[Arquivo de texto carregado: ${file.name}]\n${fileContent}`;
+                }
+            }
+
+            chatMessages.innerHTML += `<div class="message user-message">${formatMessage(finalMessage)}</div>`;
+            userInput.value = '';
+            typingIndicator.style.display = 'block';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            try {
+                const response = await sendMessageToAPI(finalMessage, fileContent, fileUpload.files[0]?.type);
+                chatMessages.innerHTML += `<div class="message ai-message">${formatMessage(response)}</div>`;
+                Prism.highlightAll();
+                saveChat(finalMessage, response);
+            } catch (error) {
+                console.error('Erro na API:', error.message);
+                chatMessages.innerHTML += `<div class="message ai-message">Erro ao processar a solicitação: ${error.message}</div>`;
+            }
+            typingIndicator.style.display = 'none';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        async function readFileAsBase64(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function sendMessageToAPI(message, fileContent, fileType) {
+            const apiKey = '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';
+            const url = 'https://api.openai.com/v1/chat/completions';
+            const behavior = aiBehavior.value || 'Você é um assistente de IA útil e amigável.';
+
+            const recentHistory = currentChatId !== null ? 
+                chats[currentChatId].messages.slice(-5).map(msg => ({
+                    role: msg.role === 'ai' ? 'assistant' : msg.role,
+                    content: msg.content
+                })) : [];
+            const messages = [
+                { role: 'system', content: behavior },
+                ...recentHistory,
+                { role: 'user', content: message }
+            ];
+
+            if (fileContent && (fileType.startsWith('image/') || fileType === 'application/pdf')) {
+                messages.push({
+                    role: 'user',
+                    content: [
+                        { type: 'text', text: 'Analise o arquivo anexado.' },
+                        { type: 'image_url', image_url: { url: `data:${fileType};base64,${fileContent}` } }
+                    ]
+                });
+            } else if (fileContent && fileType === 'text/plain') {
+                messages.push({ role: 'user', content: `Conteúdo do arquivo: ${fileContent}` });
+            }
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: 'gpt-4o-mini',
+                    store: true,
+                    messages
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.text();
+                throw new Error(`Erro ${response.status}: ${errorData}`);
+            }
+
+            const data = await response.json();
+            if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+                throw new Error('Resposta da API inválida');
+            }
+
+            return data.choices[0].message.content;
+        }
+
+        fileUpload.addEventListener('change', () => {
+            if (fileUpload.files.length > 0) {
+                userInput.placeholder = 'Mensagem (arquivo carregado será incluído)';
+            } else {
+                userInput.placeholder = 'Digite sua mensagem...';
+            }
+        });
+
+        loadChatHistory();
+    </script>
+</body>
+</html>
